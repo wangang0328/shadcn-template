@@ -11,6 +11,13 @@ import { Input } from '@/components/ui/input'
 
 import { cn } from "@/lib/utils"
 import { ButtonProps, buttonVariants } from "@/components/ui/button"
+import type { SelectProps } from "@radix-ui/react-select"
+
+interface PageSizeSelectProps extends Omit<SelectProps, 'onValueChange' | 'value'>{
+  onChange: (v: number) => void
+  options: Array<number | string>
+  value: number | string
+}
 
 /**
  * 包裹器
@@ -44,13 +51,14 @@ export const PaginationItem = React.forwardRef<
 
 type PaginationLinkProps = {
   isActive?: boolean
-} & Pick<ButtonProps, "size"> &
+} & Pick<ButtonProps, "size" | "disabled"> &
   React.ComponentProps<"a">
 
 export const PaginationLink = ({
   className,
   isActive,
   size = "icon",
+  disabled,
   ...props
 }: PaginationLinkProps) => (
   <a
@@ -60,11 +68,10 @@ export const PaginationLink = ({
         variant: isActive ? "outline" : "ghost",
         size,
       }),
+      'cursor-pointer',
+      disabled ? 'pointer-events-none opacity-50' : '',
       className
     )}
-    onClick={() => {
-      console.log('----')
-    }}
     {...props}
   />
 )
@@ -116,20 +123,22 @@ export const PaginationEllipsis = ({
 /**
  * 页数选择器
  */
-export const PageSizeSelect = () => {
+export const PageSizeSelect: React.FC<PageSizeSelectProps> = ({ disabled, onChange, value, options, ...restProps }) => {
   return (<div className="flex items-center gap-2">
       <p className="text-sm font-medium">每页多少条</p>
       <Select
-        value="0"
+        value={value + ''}
         onValueChange={(value) => {
-          console.log('value', value)
+          onChange(Number(value))
         }}
+        disabled={disabled}
+        {...restProps}
       >
         <SelectTrigger className="h-8 w-[70px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent side="top">
-          {[10, 20, 30, 40, 50].map((pageSize) => (
+          {options.map((pageSize) => (
             <SelectItem key={pageSize} value={`${pageSize}`}>
               {pageSize}
             </SelectItem>
@@ -142,20 +151,41 @@ export const PageSizeSelect = () => {
 /**
  * 快速跳转
  */
-export const QuickJumper = () => {
+export const QuickJumper: React.FC<{ disabled?: boolean, onChange: (pageNo: number) => void }> = ({ disabled, onChange }) => {
+  const [value, setValue] = React.useState<string | number>('')
+
   return (
     <div className="flex items-center gap-2">
       <span className="text-nowrap">跳转至</span>
-      <Input className="w-[40px] h-[32px]" />
+      <Input onChange={(e) => {
+        const v = e.target.value.replace(/[^0-9]/g, '')
+        setValue(v)
+      }} value={value} onBlur={() => {
+        if (value) {
+          onChange(Number(value))
+          setValue('')
+        }
+      }} onKeyDown={(e) => {
+        if (e.key === 'Enter' && value) {
+          onChange(Number(value))
+          setValue('')
+        }
+      }} disabled={disabled} className="w-[60px] h-[32px]" />
       <span>页</span>
     </div>
   )
 }
 
-export const PageTotalInfo = () => {
+export const PageTotalInfo: React.FC<{
+  total: number
+  pageNo: number
+  pageSize: number
+}> = ({ total, pageNo, pageSize }) => {
+  const minDataCount = (pageNo - 1) * pageSize
+  const maxDataCount = (minDataCount + pageSize) < total ? (minDataCount + pageSize) : total
   return (
     <div>
-      总共100条数据，当前是10-20条数据
+      总共{total}条数据，当前是{minDataCount}-{maxDataCount}条数据
     </div>
   )
 }
