@@ -16,9 +16,9 @@ import { renderCountNumList } from "./utils"
 
 export interface PaginationProps {
   /**
-   * 当前页
+   * 当前页, 从 0 开始 为和 react-table 保持一致
    */
-  pageNo?: number
+  pageIndex?: number
   pageSize?: number
   /**
    * 是否显示快速跳转，默认 是
@@ -39,8 +39,8 @@ export interface PaginationProps {
    */
   simple?: boolean
   disabled?: boolean
-  // 默认 1
-  defaultPageNo?: number
+  // 默认 0
+  defaultpageIndex?: number
   // 默认10
   defaultPageSize?: number
   /**
@@ -51,8 +51,8 @@ export interface PaginationProps {
    *  只有一页时，是否隐藏页码，默认 true
    */
   hideOnSinglePage?: boolean
-  onChange?: (pageNo: number, pageSize: number) => void
-  onPageNoChange?: (pageNo: number) => void
+  onChange?: (pageIndex: number, pageSize: number) => void
+  onpageIndexChange?: (pageIndex: number) => void
   onPageSizeChange?: (pageSize: number) => void
 }
 
@@ -64,10 +64,10 @@ const defaultPageSizeOptions = [10, 20, 50, 100, 200]
 const Pagination: React.FC<PaginationProps> = (props) => {
   const { total = 0, simple = false, disabled, onChange, overCollapseCount = 2, hideOnSinglePage = true, pageSizeOptions = defaultPageSizeOptions, showTotal = true, showQuickJumper = true } = props
   // 自己管理状态，也可以是受控状态
-  const [pageNo, setPageNo] = useControllableValue(props, { defaultValuePropName: 'defaultPageNo', valuePropName: 'pageNo', trigger: 'onPageNoChange', defaultValue: 1 })
+  const [pageIndex, setpageIndex] = useControllableValue(props, { defaultValuePropName: 'defaultpageIndex', valuePropName: 'pageIndex', trigger: 'onpageIndexChange', defaultValue: 0 })
   const [pageSize, setPageSize] = useControllableValue(props, { defaultValuePropName: 'defaultPageSize', valuePropName: 'pageSize', trigger: 'onPageSizeChange', defaultValue: 10 })
 
-  console.log('pageNo,pageSize', pageNo, pageSize)
+  console.log('pageIndex,pageSize', pageIndex, pageSize)
   // 总页数
   const totalPageCount = useMemo(() => {
     if (pageSize <= 0) {
@@ -76,34 +76,34 @@ const Pagination: React.FC<PaginationProps> = (props) => {
     return Math.ceil(total / pageSize) || 0
   }, [total, pageSize])
 
-  // pageNo 改变
-  const handlePageNoChange = useMemoizedFn((val) => {
+  // pageIndex 改变
+  const handlepageIndexChange = useMemoizedFn((val) => {
     let target = val
-    if (val < 1) {
-      target = 1
+    if (val < 0) {
+      target = 0
     }
-    if (val > totalPageCount) {
-      target = totalPageCount
+    if (val >= totalPageCount - 1) {
+      target = totalPageCount - 1
     }
-    setPageNo(target)
+    setpageIndex(target)
     onChange?.(target, pageSize)
   })
   
   // pageSize 改变
   const handlePageSizeChange = useMemoizedFn((val) => {
     setPageSize(val)
-    setPageNo(1)
-    onChange?.(1, val)
+    setpageIndex(0)
+    onChange?.(0, val)
 })
 
   const numPageList = useMemo(() =>  renderCountNumList({
-      pageNo,
+      pageIndex,
       totalPageCount,
       simple,
       overCollapseCount,
       hideOnSinglePage
     })
-  , [pageNo, totalPageCount, simple, overCollapseCount, hideOnSinglePage])
+  , [pageIndex, totalPageCount, simple, overCollapseCount, hideOnSinglePage])
 
   if (hideOnSinglePage && totalPageCount <= 1) {
     // 单页隐藏
@@ -115,30 +115,30 @@ const Pagination: React.FC<PaginationProps> = (props) => {
       <PaginationContent>
         {/* 总页码信息 */}
         {(showTotal && !simple) && <PaginationItem key="totalInfo">
-          <PageTotalInfo total={total} pageNo={pageNo} pageSize={pageSize} />
+          <PageTotalInfo total={total} pageIndex={pageIndex} pageSize={pageSize} />
         </PaginationItem>}
        {(!!pageSizeOptions && !simple) && <PaginationItem>
           <PageSizeSelect options={pageSizeOptions} onChange={handlePageSizeChange} disabled={disabled} value={pageSize} />
         </PaginationItem>}
         {/* 后退页面 */}
         <PaginationItem key="previous">
-          <PaginationPrevious disabled={disabled || pageNo === 1} onClick={() => handlePageNoChange(pageNo - 1)} />
+          <PaginationPrevious disabled={disabled || pageIndex === 0} onClick={() => handlepageIndexChange(pageIndex - 1)} />
         </PaginationItem>
         {
           numPageList.map((item, index) =>  (
             <PaginationItem key={index}>
-              {item === -1 ? <PaginationEllipsis /> : <PaginationLink onClick={() => handlePageNoChange(item)} isActive={pageNo === item} disabled={disabled}>{item}</PaginationLink>}
+              {item === -1 ? <PaginationEllipsis /> : <PaginationLink onClick={() => handlepageIndexChange(item)} isActive={pageIndex === item} disabled={disabled}>{item + 1}</PaginationLink>}
             </PaginationItem>
           )
           )
         }
         {/* 前进页面 */}
         <PaginationItem key="nex">
-          <PaginationNext disabled={disabled || pageNo === totalPageCount} onClick={() => handlePageNoChange(pageNo + 1)} />
+          <PaginationNext disabled={disabled || pageIndex === totalPageCount - 1} onClick={() => handlepageIndexChange(pageIndex + 1)} />
         </PaginationItem>
         {/* 快速跳转 */}
         {(showQuickJumper && !simple) && <PaginationItem>
-          <QuickJumper onChange={handlePageNoChange} disabled={disabled} />
+          <QuickJumper onChange={handlepageIndexChange} disabled={disabled} />
         </PaginationItem>}
       </PaginationContent>
   </PaginationWrapper>

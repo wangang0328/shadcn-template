@@ -25,6 +25,7 @@ import {
 
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
+import { useControllableValue } from "ahooks"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -41,8 +42,9 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
-  const [sorting, setSorting] = React.useState<SortingState>([])
-
+  // const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = useControllableValue({ })
+  console.log('sorting----', sorting)
   const table = useReactTable({
     data,
     columns,
@@ -51,6 +53,10 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination: {
+        pageIndex: 1,
+        pageSize: 2
+      }
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -64,7 +70,12 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
-
+  
+  console.log('columns', table.getAllColumns().length, table.getState())
+  React.useEffect(() => {
+    console.log('effect--------')
+    table.setPageIndex(10)
+  }, [])
   return (
     <div className="space-y-4">
       <DataTableToolbar table={table} />

@@ -151,7 +151,7 @@ export const PageSizeSelect: React.FC<PageSizeSelectProps> = ({ disabled, onChan
 /**
  * 快速跳转
  */
-export const QuickJumper: React.FC<{ disabled?: boolean, onChange: (pageNo: number) => void }> = ({ disabled, onChange }) => {
+export const QuickJumper: React.FC<{ disabled?: boolean, onChange: (pageIndex: number) => void }> = ({ disabled, onChange }) => {
   const [value, setValue] = React.useState<string | number>('')
 
   return (
@@ -178,10 +178,10 @@ export const QuickJumper: React.FC<{ disabled?: boolean, onChange: (pageNo: numb
 
 export const PageTotalInfo: React.FC<{
   total: number
-  pageNo: number
+  pageIndex: number
   pageSize: number
-}> = ({ total, pageNo, pageSize }) => {
-  const minDataCount = (pageNo - 1) * pageSize
+}> = ({ total, pageIndex, pageSize }) => {
+  const minDataCount = pageIndex * pageSize
   const maxDataCount = (minDataCount + pageSize) < total ? (minDataCount + pageSize) : total
   return (
     <div>

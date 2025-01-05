@@ -12,7 +12,7 @@ import { DataTableRowActions } from "./data-table-row-actions"
 
 export const columns: ColumnDef<Task>[] = [
   {
-    id: "select",
+    // id: "select",
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -20,7 +20,6 @@ export const columns: ColumnDef<Task>[] = [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
         className="translate-y-[2px]"
       />
     ),
@@ -28,25 +27,31 @@ export const columns: ColumnDef<Task>[] = [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
         className="translate-y-[2px]"
       />
     ),
+    accessorKey: 'select',
     enableSorting: false,
     enableHiding: false,
     enablePinning: true,
-    size: 180
+    size: 600,
+    minSize: 300,
+    maxSize: 600,
+    pinnerType: 'left',
+    // align: 'right'
+    // align: 'left' | 'right' | 'center'
   },
   {
     accessorKey: "id",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Task" />
     ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
+    // cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
     enableSorting: false,
     enableHiding: false,
     enableResizing: true,
-    size: 380
+    size: 880,
+    align: 'right'
   },
   {
     accessorKey: "title",
@@ -65,8 +70,7 @@ export const columns: ColumnDef<Task>[] = [
         </div>
       )
     },
-    size: 80,
-    maxSize: 100
+    size: 280,
   },
   {
     accessorKey: "status",
@@ -94,7 +98,7 @@ export const columns: ColumnDef<Task>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
-    size: 180
+    size: 680
   },
   {
     accessorKey: "priority",
@@ -122,11 +126,11 @@ export const columns: ColumnDef<Task>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
-    size: 180
+    size: 680
   },
   {
     id: "actions",
     cell: ({ row }) => <DataTableRowActions row={row} />,
-    size: 180
+    size: 680
   },
 ]
