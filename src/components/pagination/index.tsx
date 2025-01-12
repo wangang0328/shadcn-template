@@ -1,7 +1,8 @@
 import InteralPagination from './Pagination'
 import usePagination from './usePagination'
+export { type PaginationProps } from './Pagination'
 
-type TPagination = typeof InteralPagination & {
+export type TPagination = typeof InteralPagination & {
   usePagination: typeof usePagination
 }
 

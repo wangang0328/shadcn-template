@@ -75,6 +75,7 @@ export function DataTable<TData, TValue>({
   React.useEffect(() => {
     console.log('effect--------')
     table.setPageIndex(10)
+    table
   }, [])
   return (
     <div className="space-y-4">
